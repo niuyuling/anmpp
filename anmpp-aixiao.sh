@@ -1,8 +1,10 @@
 #!/system/bin/sh
+#
 #ANMPP SERVE SHELL SCRITP.
 #20150924 AIXIAO write.
 #20160222 AIXIAO modify.
 #Email: 1605227279@qq.com
+#
 
 PATH=/system/bin:/system/xbin:${PATH}
 LD_LIBRARY_PATH=/vendor/lib/:/system/lib/:${LD_LIBRARY_PATH}
