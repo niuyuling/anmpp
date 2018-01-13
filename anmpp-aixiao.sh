@@ -1,9 +1,10 @@
 #!/system/bin/sh
 #
-#ANMPP SERVE SHELL SCRITP.
-#20150924 AIXIAO write.
-#20160222 AIXIAO modify.
-#Email: 1605227279@qq.com
+#   ANMPP SERVE SHELL SCRITP.
+#   20150924 AIXIAO write.
+#   20160222 AIXIAO modify.
+#   20180113 AIXIAO modify.
+#   Email: 1605227279@qq.com
 #
 
 PATH=/system/bin:/system/xbin:${PATH}

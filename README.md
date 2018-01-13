@@ -1,6 +1,6 @@
 # anmmp
 Anmpp Server Shell Stript
 
-old.
+all old.
 
 Official website: http://webthen.net/
