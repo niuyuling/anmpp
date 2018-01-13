@@ -236,153 +236,153 @@ fi
 if ${busybox} [[ ${#} -le 6 ]] ; then
 if ${busybox} [[ ${#} -ge 2 ]] ; then
     aixiao=$(${busybox} echo $(eval echo "\$$#"))
-if ${busybox} [[ "$aixiao" = "start" ]] || ${busybox} [[ "$aixiao" = "stop" ]] || ${busybox} [[ "$aixiao" = "reload" ]] || ${busybox} [[ "$aixiao" = "status" ]] ; then
-if ${busybox} [[ "$1" != "start" ]] || ${busybox} [[ "$1" != "stop" ]] || ${busybox} [[ "$1" != "reload" ]] || ${busybox}  [[ "$1" != "status" ]] ; then
-    ai="$@"; xiaoai=$(${busybox} echo ${ai%% ${aixiao}})
-fi 
-XIAOAI=($xiaoai)
-for zhy in "${XIAOAI[@]}"
-do
-    if ${busybox} [[ "$zhy" = "bftpd" ]] ; then :;
-    elif ${busybox} [[ "$zhy" = "nginx" ]] ; then :;
-    elif ${busybox} [[ "$zhy" = "mysql" ]] ; then :;
-    elif ${busybox} [[ "$zhy" = "php-fpm" ]] ; then :;
-    elif ${busybox} [[ "$zhy" = "postgresql" ]] ; then :;
+    if ${busybox} [[ "$aixiao" = "start" ]] || ${busybox} [[ "$aixiao" = "stop" ]] || ${busybox} [[ "$aixiao" = "reload" ]] || ${busybox} [[ "$aixiao" = "status" ]] ; then
+        if ${busybox} [[ "$1" != "start" ]] || ${busybox} [[ "$1" != "stop" ]] || ${busybox} [[ "$1" != "reload" ]] || ${busybox}  [[ "$1" != "status" ]] ; then
+            ai="$@"; xiaoai=$(${busybox} echo ${ai%% ${aixiao}})
+        fi 
+        XIAOAI=($xiaoai)
+        for zhy in "${XIAOAI[@]}"
+        do
+            if ${busybox} [[ "$zhy" = "bftpd" ]] ; then :;
+            elif ${busybox} [[ "$zhy" = "nginx" ]] ; then :;
+            elif ${busybox} [[ "$zhy" = "mysql" ]] ; then :;
+            elif ${busybox} [[ "$zhy" = "php-fpm" ]] ; then :;
+            elif ${busybox} [[ "$zhy" = "postgresql" ]] ; then :;
+            else
+                function_help
+                exit 0
+            fi
+        done
+        for nyl in "${XIAOAI[@]}"
+        do
+        case "$nyl" in
+            bftpd)
+                case "$aixiao" in 
+                    start)
+                        function_uid
+                        ${bftpd} -c ${bftpd_conf} -i -D -d &> ${null} &
+                        ;;
+                    stop)
+                        function_uid
+                        ${busybox} kill -9 `${toolbox} ps | ${busybox} grep 'bftpd' | ${busybox} awk '{print $2}'` &> ${null} &
+                        ;;
+                    reload)
+                        function_uid
+                        eval ${0} bftpd stop
+                        eval ${0} bftpd start
+                        ;;
+                    status) 
+                        if $busybox [[ "`function_status bftpd status`" = "bftpd" ]] ; then
+                            ${busybox} echo "BFTPD      RUNUING"
+                        else ${busybox} echo "BFTPD      NO RUNUING" ; fi
+                        ;;
+                    esac
+                    ;;
+            nginx)
+                case "$aixiao" in
+                    start)
+                        function_uid
+                        ${nginx} &> ${null} &
+                        ;;
+                    stop)
+                        function_uid
+                        if ${busybox} [[ -e ${nginx_pid} ]] ; then
+                            ${nginx} -s stop &
+                        else
+                            ${busybox} kill -9 `${toolbox} ps | ${busybox} grep 'nginx' | ${busybox} awk '{print $2}'` &> ${null} &
+                        fi
+                        ;;
+                    reload)
+                        function_uid
+                        eval ${0} nginx stop
+                        eval ${0} nginx start
+                        ;;
+                    status)
+                        if ${busybox} [[ "`function_status nginx status`" = "nginx" ]] ; then
+                            ${busybox} echo "NGINX      RUNUING"
+                        else ${busybox} echo "NGINX      NO RUNUING" ; fi
+                        ;;
+                    esac
+                    ;;
+            mysql)
+                case "${aixiao}" in
+                    start)
+                        function_uid
+                        ${mysqld} --defaults-file=${mysql_conf} --user=root &> ${null} &
+                        ;;
+                    stop)
+                        function_uid
+                        ${busybox} kill -9 `${toolbox} ps | ${busybox} grep 'mysqld' | ${busybox} awk '{print $2}'` &> ${null} &
+                        ;;
+                    reload)
+                        function_uid
+                        eval ${0} mysql stop
+                        eval ${0} mysql start
+                        ;;
+                    status)
+                        if ${busybox} [[ "`function_status mysqld status`" = "mysqld" ]] ; then
+                            ${busybox} echo "MYSQL      RUNUING"
+                        else ${busybox} echo "MYSQL      NO RUNUING" ; fi
+                        ;;
+                    esac
+                    ;;
+            php-fpm)
+                case "${aixiao}" in
+                    start)
+                        function_uid
+                        ${php_fpm} -R -p ${php_fpm_home} &> ${null} &
+                        ;;
+                    stop)
+                        function_uid
+                        ${busybox} kill -9 `$toolbox ps | $busybox grep 'php-fpm' | $busybox awk '{print $2}'` &> ${null} &
+                        ;;
+                    reload)
+                        function_uid
+                        eval ${0} php-fpm stop
+                        eval ${0} php-fpm start
+                        ;;
+                    status)
+                        if ${busybox} [[ "`function_status php-fpm status`" = "php-fpm" ]] ; then
+                            ${busybox} echo "PHP-FPM    RUNUING" ; else
+                            ${busybox} echo "PHP-FPM    NO RUNUING" ;  fi
+                            ;;
+                    esac
+                    ;;
+            postgresql)
+                case "${aixiao}" in
+                    start)
+                        function_uid
+                        if ${busybox} [[ -d ${pgsql_home} ]] ; then
+                            function_mount
+                            ${busybox} chroot ${pgsql_home} /bin/su -c "/init /etc/start" postgres &> ${null}
+                        fi
+                        ;;           
+                    stop)
+                        function_uid
+                        if ${busybox} [[ -d ${pgsql_home} ]] ; then
+                            ${busybox} chroot ${pgsql_home} /bin/su -c "/init /etc/stop" postgres &> ${null}
+                            function_umount
+                        fi
+                        ;;
+                reload)
+                    function_uid
+                    if ${busybox} [[ -d ${pgsql_home} ]] ; then
+                        function_mount
+                        ${busybox} chroot ${pgsql_home} /bin/su -c "/init /etc/reload" postgres &> ${null}
+                    fi
+                    ;;
+                status)
+                    if ${busybox} [[ "`function_status postgres status`" = "postgres" ]] ; then
+                        ${busybox} echo "POSTGRESQL RUNUING"
+                    else ${busybox} echo "POSTGRESQL NO RUNUING" ; fi                    
+                    ;;
+                esac
+                ;;
+        esac 
+        done
     else
         function_help
         exit 0
     fi
-done
-for nyl in "${XIAOAI[@]}"
-do
-case "$nyl" in
-    bftpd)
-        case "$aixiao" in 
-        start)
-            function_uid
-            ${bftpd} -c ${bftpd_conf} -i -D -d &> ${null} &
-            ;;
-        stop)
-            function_uid
-            ${busybox} kill -9 `${toolbox} ps | ${busybox} grep 'bftpd' | ${busybox} awk '{print $2}'` &> ${null} &
-            ;;
-        reload)
-            function_uid
-            eval ${0} bftpd stop
-            eval ${0} bftpd start
-            ;;
-        status) 
-            if $busybox [[ "`function_status bftpd status`" = "bftpd" ]] ; then
-                ${busybox} echo "BFTPD      RUNUING"
-            else ${busybox} echo "BFTPD      NO RUNUING" ; fi
-            ;;
-        esac
-        ;;
-    nginx)
-        case "$aixiao" in
-            start)
-            function_uid
-            ${nginx} &> ${null} &
-            ;;
-            stop)
-                function_uid
-                if ${busybox} [[ -e ${nginx_pid} ]] ; then
-                    ${nginx} -s stop &
-                else
-                    ${busybox} kill -9 `${toolbox} ps | ${busybox} grep 'nginx' | ${busybox} awk '{print $2}'` &> ${null} &
-                fi
-                ;;
-            reload)
-                function_uid
-                eval ${0} nginx stop
-                eval ${0} nginx start
-                ;;
-            status)
-                if ${busybox} [[ "`function_status nginx status`" = "nginx" ]] ; then
-                    ${busybox} echo "NGINX      RUNUING"
-                else ${busybox} echo "NGINX      NO RUNUING" ; fi
-                ;;
-            esac
-            ;;
-    mysql)
-        case "${aixiao}" in
-            start)
-                function_uid
-                ${mysqld} --defaults-file=${mysql_conf} --user=root &> ${null} &
-                ;;
-            stop)
-                function_uid
-                ${busybox} kill -9 `${toolbox} ps | ${busybox} grep 'mysqld' | ${busybox} awk '{print $2}'` &> ${null} &
-                ;;
-            reload)
-                function_uid
-                eval ${0} mysql stop
-                eval ${0} mysql start
-                ;;
-            status)
-                if ${busybox} [[ "`function_status mysqld status`" = "mysqld" ]] ; then
-                    ${busybox} echo "MYSQL      RUNUING"
-                else ${busybox} echo "MYSQL      NO RUNUING" ; fi
-                ;;
-            esac
-            ;;
-    php-fpm)
-        case "${aixiao}" in
-        start)
-            function_uid
-            ${php_fpm} -R -p ${php_fpm_home} &> ${null} &
-            ;;
-        stop)
-            function_uid
-            ${busybox} kill -9 `$toolbox ps | $busybox grep 'php-fpm' | $busybox awk '{print $2}'` &> ${null} &
-            ;;
-        reload)
-            function_uid
-            eval ${0} php-fpm stop
-            eval ${0} php-fpm start
-            ;;
-        status)
-            if ${busybox} [[ "`function_status php-fpm status`" = "php-fpm" ]] ; then
-            ${busybox} echo "PHP-FPM    RUNUING" ; else
-            ${busybox} echo "PHP-FPM    NO RUNUING" ;  fi
-            ;;
-        esac
-        ;;
-    postgresql)
-        case "${aixiao}" in
-        start)
-            function_uid
-            if ${busybox} [[ -d ${pgsql_home} ]] ; then
-                function_mount
-                ${busybox} chroot ${pgsql_home} /bin/su -c "/init /etc/start" postgres &> ${null}
-            fi
-            ;;           
-        stop)
-            function_uid
-            if ${busybox} [[ -d ${pgsql_home} ]] ; then
-                ${busybox} chroot ${pgsql_home} /bin/su -c "/init /etc/stop" postgres &> ${null}
-                function_umount
-            fi
-            ;;
-        reload)
-            function_uid
-            if ${busybox} [[ -d ${pgsql_home} ]] ; then
-                function_mount
-                ${busybox} chroot ${pgsql_home} /bin/su -c "/init /etc/reload" postgres &> ${null}
-            fi
-            ;;
-        status)
-            if ${busybox} [[ "`function_status postgres status`" = "postgres" ]] ; then
-                ${busybox} echo "POSTGRESQL RUNUING"
-            else ${busybox} echo "POSTGRESQL NO RUNUING" ; fi                    
-            ;;
-        esac
-        ;;
-esac 
-done
-else
-    function_help
-    exit 0
-fi
 fi
 fi
